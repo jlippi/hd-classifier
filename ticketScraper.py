@@ -40,7 +40,7 @@ class ticketScraper(object):
     while more:
       if page % 20 == 0:
         print 'requesting page', page
-      more = _github_loop(page)
+      more = self._github_loop(page)
       page += 1
 
   def _github_loop(self, page):

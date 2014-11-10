@@ -1,0 +1,16 @@
+<html>
+<head>
+<link rel=stylesheet type=text/css href="{{ url_for('static', filename='mycss.css') }}">
+</head>
+<body style="color:#E8ADAA">
+    {% for i in data %}
+    <table>
+        <tr><td>title</td>
+        <td>{{ i['json']['title'] }}</td></tr>
+        <tr><td>body</td><td>{{ i['json']['body'] }}</td></tr>
+        <tr><td>created at</td><td>{{ i['json']['created_at'] }}</td></tr>
+        <tr><td>labels</td><td>{{ i['json']['labels'] }}</td></tr>
+    </table>
+    {% endfor %}
+</body>
+</html>
