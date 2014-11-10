@@ -1,8 +1,9 @@
 <html>
 <head>
-<link rel=stylesheet type=text/css href="{{ url_for('static', filename='mycss.css') }}">
+  <link rel=stylesheet type=text/css href="{{ url_for('static', filename='mycss.css') }}">
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
 </head>
-<body style="color:#E8ADAA">
+<body>
     {% for i in data %}
     <table>
         <tr><td>title</td>
@@ -10,7 +11,34 @@
         <tr><td>body</td><td>{{ i['json']['body'] }}</td></tr>
         <tr><td>created at</td><td>{{ i['json']['created_at'] }}</td></tr>
         <tr><td>labels</td><td>{{ i['json']['labels'] }}</td></tr>
+        <tr><td>guesses</td><td>{{ i['json']['guesses'] }}</td></tr>
+        <tr><td>Flag</td><td>
+          <form action="/flag" class="changeClass" event_id="{{ i['_id'] }}" >
+            <input type="radio" name="flag{{ i['_id'] }}" value="Bug" {% if has_label(i['json'],'bug') %}checked{% endif %} >Bug</input><br>
+            <input type="radio" name="flag{{ i['_id'] }}" value="Feature"  {% if has_label(i['json'],'feature') %}checked{% endif %} >Feature</input><br>
+            <input type="radio" name="flag{{ i['_id'] }}" value="uncategorized" {% if not has_label(i['json'],'bug') and not has_label(i['json'],'feature') %}checked{% endif %}>Uncategorized</input><br>
+            <button type="submit" value="Search">Submit</button>
+          </form>
     </table>
     {% endfor %}
+    <script>
+      $( ".changeClass").submit(function(event) {
+      event.preventDefault();
+      name = 'flag' + this.attributes.event_id.value;
+      var $form = $( this),
+        id = $form.attr("event_id"),
+        url = $form.attr("action");
+        flag = $('input[name="' + name + '"]:radio:checked').val();
+      var posting = $.post( url, {flag: flag, id: id});
+      posting.done(function (data) {
+        var content = $(data).find("#content");
+        $( "#result" ).empty().append(content);
+        });
+      $("#" + id).attr("style","display:none");
+      location.reload();
+      });
+  </script>
+
 </body>
+
 </html>

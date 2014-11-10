@@ -1,21 +1,11 @@
 <html>
 <head>
-<link rel=stylesheet type=text/css href="{{ url_for('static', filename='mycss.css') }}">
+  <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+  <script src="http://code.jquery.com/jquery-2.1.0.min.js"></script>
+  <script src="{{ url_for('static', filename='main.js') }}" ></script>
 </head>
-<body style="color:#E8ADAA">
-   <p><h1>Fill out this form to get a sweet new wallpaper!</h1></p>
-
-   <p><form action='/get_wallpaper' method='POST' id='wform'>
-       <div> Search Query:
-       <input type='text' name='Search_Query'></input>
-       </div>
-       <div> N Rows:
-       <input type='text' name='N_Rows' value = '1'></input>
-       </div>
-       <div> N Cols:
-       <input type='text' name='N_Cols' value = '1'></input>
-       </div>
-       <input type='submit' value='GET ME WALLPAPER!'/>
-   </form></p>
+<body>
+  <div id="chart"></div>
+  <div id="info"></div>
 </body>
 </html>
