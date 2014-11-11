@@ -6,6 +6,14 @@ $(function() {
   createGraph();
 });
 
+var detail_url;
+
+function showDetails() {
+   url = detail_url;
+   $.get(url).done( function(d)  {
+     $('.ticket_detail').html(d); });
+}
+
 function createGraph() {
 
   // main config
@@ -16,6 +24,8 @@ function createGraph() {
   var sizeOfRadius = d3.scale.pow().domain([-100,100]).range([-50,50]);  // https://github.com/mbostock/d3/wiki/Quantitative-Scales#pow
   var xPosition = d3.scale.linear().domain([0,1]).range([0,width])
   var yPosition = d3.scale.linear().domain([0,1]).range([0,height])
+
+  d3.select('#detail').append("g").attr("class","ticket_detail");
 
   // bubble config
   //var bubble = d3.layout.pack()
@@ -44,10 +54,9 @@ function createGraph() {
     .text("tooltip");
 
   // request the data
-  d3.json("/data", function(error, quotes) {
-    console.log(quotes)
+  d3.json("/data", function(error, tickets) {
     var node = svg.selectAll('.node')
-      .data(quotes.children)
+      .data(tickets.children)
       .enter().append('g')
       .attr('class', 'node')
       .attr('transform', function(d) { return 'translate(' + xPosition(d.guesses.bug)+ ',' + xPosition(d.guesses.feature) + ')'});
@@ -62,7 +71,9 @@ function createGraph() {
     .on("mousemove", function() {
       return tooltip.style("top", (d3.event.pageY-10)+"px").style("left",(d3.event.pageX+10)+"px");
     })
+   .on("click", function(d) { detail_url = d.url; showDetails(); })
    .on("mouseout", function(){return tooltip.style("visibility", "hidden");});
+
 
   //  node.append('text')
   //    .attr("dy", ".3em")

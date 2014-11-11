@@ -40,8 +40,6 @@ def flag():
     mutually_exclusive_labels = ['bug','feature','uncategorized']
     flag = request.form['flag']
     event_id = request.form['id']
-    print flag
-    print event_id
     a = coll.find({"_id": ObjectId(event_id)}).next()
     labels = a['json']['labels']
     labels = [l for l in labels if l['name'].lower() not in mutually_exclusive_labels]
@@ -61,7 +59,9 @@ def get_data():
         result = {'_id' : str(entry['_id']),
                   'title': entry['json']['title'],
                   'guesses': entry['json']['guesses'],
-                  'url': '/get_ticket?tid=' + str(entry['_id'])}
+                  'url': '/get_ticket?raw=true&tid=' + str(entry['_id']),
+                  'text': entry['json']['text'],
+                  'guesses': entry['json']['guesses']}
         results['children'].append(result)
     return results
 
@@ -70,9 +70,12 @@ def get_ticket():
     parser = reqparse.RequestParser()
     parser.add_argument('tid',type=str, help='please provide ticket ID (tid)')
     parser.add_argument('pure_json', type=bool)
+    parser.add_argument('raw',type=bool)
     args = parser.parse_args()
     tid = args['tid']
     tickets = list(coll.find({'_id': ObjectId(tid)}))
+    if args['raw']:
+        return render_template('ticket_details.html', data=tickets)
     if args['pure_json']:
         return '\n'.join(str(t) for t in tickets)
     if len(tickets) < 1:
