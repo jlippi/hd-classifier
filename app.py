@@ -11,6 +11,7 @@ import pandas as pd
 import datetime
 from bson import ObjectId
 from pymongo import MongoClient
+import pymongo
 from flask.ext.restful import Resource, fields, reqparse
 
 app = Flask(__name__)
@@ -55,13 +56,15 @@ def data():
 
 def get_data():
     results = {'children': []}
-    for entry in coll.find().limit(100):
+    for entry in coll.find().sort([("json.created_at", pymongo.DESCENDING)]).limit(100):
         result = {'_id' : str(entry['_id']),
                   'title': entry['json']['title'],
                   'guesses': entry['json']['guesses'],
                   'url': '/get_ticket?raw=true&tid=' + str(entry['_id']),
                   'text': entry['json']['text'],
-                  'guesses': entry['json']['guesses']}
+                  'guesses': entry['json']['guesses'],
+                  'created_at': entry['json']['created_at'],
+                  'priority': entry['json']['priority']}
         results['children'].append(result)
     return results
 

@@ -17,13 +17,11 @@ function showDetails() {
 function createGraph() {
 
   // main config
-  var width = 500; // chart width
+  var width = 1000; // chart width
   var height = 500; // chart height
   var format = d3.format(",d");  // convert value to integer
   var color = d3.scale.category20b();  // create ordial scale with 20 colors
   var sizeOfRadius = d3.scale.pow().domain([-100,100]).range([-50,50]);  // https://github.com/mbostock/d3/wiki/Quantitative-Scales#pow
-  var xPosition = d3.scale.linear().domain([0,1]).range([0,width])
-  var yPosition = d3.scale.linear().domain([0,1]).range([0,height])
 
   d3.select('#detail').append("g").attr("class","ticket_detail");
 
@@ -55,14 +53,17 @@ function createGraph() {
 
   // request the data
   d3.json("/data", function(error, tickets) {
+    var xPosition = d3.scale.linear().domain([tickets.children.length,0]).range([0,width])
+    var yPosition = d3.scale.linear().domain([0,1]).range([height,0])
+    var radiusScaler = d3.scale.sqrt().domain([1,5]).range([10,35])
     var node = svg.selectAll('.node')
       .data(tickets.children)
       .enter().append('g')
       .attr('class', 'node')
-      .attr('transform', function(d) { return 'translate(' + xPosition(d.guesses.bug)+ ',' + xPosition(d.guesses.feature) + ')'});
+      .attr('transform', function(d,i) { return 'translate(' + xPosition(i)+ ',' + yPosition(d.guesses.feature) + ')'});
 
   node.append("circle")
-    .attr("r", 10)
+    .attr("r", function(d) { return radiusScaler(d.priority); })
     .style('fill', function(d) { return color(d.symbol); })
     .on("mouseover", function(d) {
       tooltip.text(d.title);
