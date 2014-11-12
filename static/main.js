@@ -6,8 +6,8 @@ $(function() {
   createGraph();
 });
 
-var detail_url;
 var data;
+var details_url; // this is necessary so that the details page can be refreshed
 
 var width = 1000; // chart width
 var height = 500; // chart height
@@ -36,8 +36,6 @@ function drawButtons() {
   d3.selectAll(".labelText").remove();
   var buttons = d3.select(".text_div");
 
-  //var buttons_group = buttons.append("g");
-
 
   for (label in labels) {
     buttons
@@ -50,14 +48,6 @@ function drawButtons() {
       .attr("class","labelText")
       .style("background-color", label_colors)
     }
-
-  /* 
-  var textBoxes = d3.selectAll(".labelText")[0]
-  var disp = 0;
-  for (label in textBoxes) {
-    d3.select(textBoxes[label]).attr("transform","translate(" + disp + ",0) rotate(90)");
-    //disp += textBoxes[label].getClientRects()[0].height; 
-  } */
 }
 
 function drawGraph(tickets) {
@@ -78,15 +68,19 @@ function drawGraph(tickets) {
       .enter().append('g')
       .attr('class', 'node')
       .attr('transform', function(d,i) { 
-        return 'translate(' + xPosition(i) + ',' + yPosition(d.guesses[curr_cat]) + ')'});
+        if (curr_cat in d.guesses) {
+          return 'translate(' + xPosition(i) + ',' + yPosition(d.guesses[curr_cat]) + ')'
+        }
+        return ''}
+          );
 
   node.append("circle")
       .attr("r", function(d) { return radiusScaler(d.priority); })
       .style("visibility", function(d) {
         if ( d.guesses[curr_cat] === undefined ) {
-          return "none";
+          return "hidden";
         }
-        return null;
+        return "visible";
       })
       .style("fill", function(d) {
         var best_guess_label;
@@ -106,12 +100,12 @@ function drawGraph(tickets) {
       .on("mousemove", function() {
           return tooltip.style("top", (d3.event.pageY-10)+"px").style("left",(d3.event.pageX+10)+"px");
       })
-      .on("click", function(d) { detail_url = d.url; showDetails(); })
+      .on("click", function(d) { details_url = d.url; showDetails(); })
       .on("mouseout", function(){return tooltip.style("visibility", "hidden");})
 }
 
 function showDetails() {
-   url = detail_url;
+   url = details_url;
    $.get(url).done( function(d)  {
      $('.ticket_detail').html(d); });
 }
@@ -122,22 +116,6 @@ function createGraph() {
 
   var format = d3.format(",d");  // convert value to integer
 
-  //d3.select('#detail').append("g").attr("class","ticket_detail");
-
-  // bubble config
-  //var bubble = d3.layout.pack()
-  //  .sort(null)  // disable sorting, use DOM tree traversal
-  //  .size([width, height])  // chart layout size
-  // .padding(1)  // padding between circles
-  //  .radius(function(d) { return 20 + (sizeOfRadius(d) * 60); });  // radius for each circle
-
-  // svg config
-  //var svg = d3.select("#chart").append("svg") // append to DOM
-  //  .attr("width", width)
-  //  .attr("height", height)
-  //  .attr("class", "bubble");
-
-  // tooltip config
   tooltip = d3.select("body")
     .append("div")
     .style("position", "absolute")
@@ -150,12 +128,6 @@ function createGraph() {
    .style("font", "12px sans-serif")
     .text("tooltip");
 
-  // request the data
   refreshData();
-
-  //  node.append('text')
-  //    .attr("dy", ".3em")
-  //    .style('text-anchor', 'middle')
-  //    .text(function(d) { return d.symbol; });
 
 }

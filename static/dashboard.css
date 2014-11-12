@@ -1,20 +1,5 @@
-#chart {
- /*   height:300px;
-    width:500px; */
-    /*float: left;*/
+.bubble {
     background-color: #DDDDDD;
-}
-
-#above_div {
-    height:150px;
-    width: 50px;
-}
-
-
-.text_div{
-    float: none;
-  /*  transform: rotate(-90deg);
-    transform-origin: left top 0; */
 }
 
 .labelText {

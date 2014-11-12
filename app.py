@@ -20,22 +20,6 @@ app = Flask(__name__)
 def index():
     return render_template('index.html')
 
-#@app.route('/score', methods=['POST'])
-#def score():
-#    data = request.get_json()
-#    df = pd.DataFrame(pd.Series(data)).T
-#    data['prediction'] = str(''.join(fm.predict(df)))
-#    data['prediction_probability'] = str(fm.predict_proba(df)[0][0])
-#    data['flag'] = 'uncategorized'
-#    coll.insert(data)#
-#
-#    return '<html>'
-
-#@app.route('/dashboard', methods = ['GET'])
-#def dashboard():
-#    data = list(coll.find({"flag": "uncategorized","prediction":"fraud"}).limit(10))
-#    return render_template('dashboard.html', data = data)
-
 @app.route('/flag', methods = ['POST'])
 def flag():
     mutually_exclusive_labels = ['bug','feature','uncategorized']
@@ -103,8 +87,4 @@ if __name__ == '__main__':
     db = client['helpdesk']
     coll = db['github_saltstack']
 
-    # load pickled models
-    #fm = pickle.load(open('pickle_init.pkl'))
-
-    # run application
     app.run(host='0.0.0.0', port=7000, debug=True)

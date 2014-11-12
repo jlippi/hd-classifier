@@ -24,7 +24,6 @@
         url = $form.attr("action");
         flag = $('input[name="' + name + '"]:radio:checked').val();
       var posting = $.post( url, {flag: flag, id: id});
-      //debugger;
       posting.done(function () {
          showDetails();
        });
