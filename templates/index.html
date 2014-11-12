@@ -2,14 +2,19 @@
 <head>
   <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
   <script src="http://code.jquery.com/jquery-2.1.0.min.js"></script>
-  <script src="{{ url_for('static', filename='main.js') }}" ></script>
+  <script src="{{ url_for('static', filename='main.js') }}"></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='dashboard.css') }}" />
 </head>
 <body>
-  <table>
-    <tr><td><div id="chart"></div></td>
-        <td><div id="labels">Buttons!</div></td></tr>
+  <div id="chart" style="display:table-cell"></div>
+  <div>
+    <g class="ticket_detail"></g>
+  </div>
+  <div class='text_div'> 
+    <div class='labelText' style="background-color:orange"> BOX 1</div> 
+    <div class='labelText' style="background-color:blue"> BOX 2</div>
+    <div class='labelText' style="background-color:black"> BOX 3 </div>
+  </div>
 
-  </table>
-  <div id="detail"></div>
 </body>
 </html>
