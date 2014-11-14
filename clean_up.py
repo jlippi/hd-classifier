@@ -232,7 +232,7 @@ all_t = tfidf.fit_transform(' '.join(x) for x in all_sentences)
 labeled_t = tfidf.transform(' '.join(x) for x in X)
 
 
-# In[51]:
+# In[110]:
 
 def fit_and_predict_for_category(y_vector, labeled_probas, labeled_t, labeled_kmeans,
                                            all_t, all_probas, all_kmeans):
@@ -255,11 +255,27 @@ def fit_and_predict_for_category(y_vector, labeled_probas, labeled_t, labeled_km
                            lr_lda.predict_proba(all_probas)[:,0].reshape(-1,1),
                            svc_kmeans.predict_proba(all_kmeans)[:,0].reshape(-1,1)
                            ))
-    all_preds = np.array(lr_ensemble.predict_proba(lr_all_sentences)[:,0])
+    all_preds = np.array(lr_ensemble.predict_proba(lr_all_sentences)[:,1])
     return all_preds
 
 
-# In[65]:
+# In[111]:
+
+a = fit_and_predict_for_category(all_or_nothing_vectors['Bug'],labeled_probas,labeled_t,labeled_kmeans,all_t,all_probas,all_kmeans)
+
+
+# In[112]:
+
+print np.mean(all_or_nothing_vectors['Bug'])
+print np.mean(a)
+
+
+# In[113]:
+
+print np.mean(guesses_raw[3])
+
+
+# In[114]:
 
 guesses_raw = map(lambda x: fit_and_predict_for_category(all_or_nothing_vectors[x], 
                                            labeled_probas, labeled_t, labeled_kmeans,
@@ -268,12 +284,12 @@ guesses_raw = map(lambda x: fit_and_predict_for_category(all_or_nothing_vectors[
 labels_raw = [x for x in all_or_nothing_vectors]
 
 
-# In[67]:
+# In[115]:
 
 guesses_zipped = zip(*guesses_raw)
 
 
-# In[80]:
+# In[116]:
 
 for i, g in enumerate(guesses_zipped):
     guess = {c[0]: c[1] for c in zip(labels_raw,g)}
@@ -281,14 +297,29 @@ for i, g in enumerate(guesses_zipped):
     coll.update({'_id':tid},{"$set":{"guesses": guess}})
 
 
-# In[82]:
-
-coll.find_one()
-
-
-# In[66]:
+# In[117]:
 
 labels_raw
+
+
+# In[118]:
+
+np.mean(guesses_raw[3])
+
+
+# In[97]:
+
+1. - all_or_nothing_vectors['Bug'].mean()
+
+
+# In[102]:
+
+y_vector.mean()
+
+
+# In[101]:
+
+guesses_raw[3].mean()
 
 
 # In[ ]:
