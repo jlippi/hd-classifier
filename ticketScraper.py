@@ -13,17 +13,17 @@ class ticketScraper(object):
   required_cols = ['labels','title','severity','ticket_url',
                           'repo_url','project','created_at']
 
-  def __init__(self, tracker, project, mongo_coll, url=None, auth=None):
-    self.tracker = tracker
-    self.project = project
-    self.url = url
-    self.auth = auth
-    self.mongo_coll = mongo_coll
+  def __init__(self, parms):
+    self.tracker = parms['tracker']
+    self.project = parms['project']
+    self.url = parms['url']
+    self.auth = parms['auth']
+    self.mongo_coll = parms['mongo_coll']
 
 
     if self.tracker == 'github':
       self.scraper = self.scrape_github
-      if not url:
+      if not self.url:
         self.url = 'https://api.github.com/repos/'
     if self.tracker == 'jira':
       self.scraper = self.scrape_jira
@@ -119,6 +119,10 @@ class ticketScraper(object):
     for col in ticketScraper.required_cols:
       if col not in ticket:
         raise missingCol(col)
+    for x in ticket:
+      if not ticket[x]:
+        ticket[x] = ''
+        
     self.mongo_coll.insert(ticket)
     return
 

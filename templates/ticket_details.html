@@ -1,16 +1,16 @@
     {% for i in data %}
     <table>
         <tr><td>title</td>
-        <td>{{ i['json']['title'] }}</td></tr>
-        <tr><td>body</td><td>{{ i['json']['body'] }}</td></tr>
-        <tr><td>created at</td><td>{{ i['json']['created_at'] }}</td></tr>
-        <tr><td>labels</td><td>{{ i['json']['labels'] }}</td></tr>
-        <tr><td>guesses</td><td>{{ i['json']['guesses'] }}</td></tr>
+        <td>{{ i['title'] }}</td></tr>
+        <tr><td>body</td><td>{{ i['body'] }}</td></tr>
+        <tr><td>created at</td><td>{{ i['created_at'] }}</td></tr>
+        <tr><td>labels</td><td>{{ i['labels'] }}</td></tr>
+        <tr><td>guesses</td><td>{{ i['guesses'] }}</td></tr>
         <tr><td>Flag</td><td>
           <form action="/flag" class="changeClass" event_id="{{ i['_id'] }}">
-            <input type="radio" name="flag{{ i['_id'] }}" value="Bug" {% if has_label(i['json'],'bug') %}checked{% endif %} >Bug</input><br>
-            <input type="radio" name="flag{{ i['_id'] }}" value="Feature"  {% if has_label(i['json'],'feature') %}checked{% endif %} >Feature</input><br>
-            <input type="radio" name="flag{{ i['_id'] }}" value="uncategorized" {% if not has_label(i['json'],'bug') and not has_label(i['json'],'feature') %}checked{% endif %}>Uncategorized</input><br>
+            <input type="radio" name="flag{{ i['_id'] }}" value="Bug" {% if has_label(i['labels'],'bug') %}checked{% endif %} >Bug</input><br>
+            <input type="radio" name="flag{{ i['_id'] }}" value="Feature"  {% if has_label(i['labels'],'feature') %}checked{% endif %} >Feature</input><br>
+            <input type="radio" name="flag{{ i['_id'] }}" value="uncategorized" {% if not has_label(i['labels'],'bug') and not has_label(i['labels'],'feature') %}checked{% endif %}>Uncategorized</input><br>
             <button type="submit" value="Search">Submit</button>
           </form>
     </table>

@@ -2,6 +2,8 @@ from flask import Flask
 from flask import request
 from flask import render_template
 from flask import jsonify
+from flask import send_from_directory
+import os
 import requests
 import bs4
 import random
@@ -40,7 +42,7 @@ def data():
 
 def get_data():
     results = {'children': []}
-    for entry in coll.find().sort([("created_at", pymongo.DESCENDING)]).limit(100):
+    for entry in coll.find().sort([("created_at", pymongo.DESCENDING)]).limit(1000):
         result = {'_id' : str(entry['_id']),
                   'title': entry['title'],
                   'guesses': entry['guesses'],
@@ -75,9 +77,8 @@ def utility_processor():
         if a == b:
             return c
     def has_label(i, labelName):
-        for j in i['labels']:
-            if labelName == j['name']:
-                return True
+        return labelName in i
+
     return dict(equals=equals,
                 has_label=has_label)
 
@@ -85,5 +86,4 @@ if __name__ == '__main__':
     client = MongoClient('mongodb://localhost:27017/')
     db = client['hd-test']
     coll = db['salt']
-
-    app.run(host='0.0.0.0', port=7000, debug=True)
+    app.run(host='0.0.0.0', port=7001, debug=True)
