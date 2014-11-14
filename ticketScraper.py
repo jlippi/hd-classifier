@@ -10,14 +10,16 @@ import lxml
 from xmltodict import parse
 
 class ticketScraper(object):
+  required_cols = ['labels','title','severity','ticket_url',
+                          'repo_url','project','created_at']
 
   def __init__(self, tracker, project, mongo_coll, url=None, auth=None):
-    print tracker
     self.tracker = tracker
     self.project = project
     self.url = url
     self.auth = auth
     self.mongo_coll = mongo_coll
+
 
     if self.tracker == 'github':
       self.scraper = self.scrape_github
@@ -49,48 +51,77 @@ class ticketScraper(object):
     json_list = a.json()
     if len(json_list) > 0:
       for j_obj in json_list:
-        ticket = {'url': url,
-                  'project': self.project,
-                  'json': j_obj}
-        self.mongo_coll.insert(ticket)
+        ticket = {'repo_url': url,
+          'project': self.project,
+          'title': j_obj['title'],
+          'body': j_obj['body'],
+          'severity': 3,
+          'ticket_url': j_obj['html_url'],
+          'created_at': j_obj['created_at'],
+          'labels': list()}
+        for label in j_obj['labels']:
+          ticket['labels'].append(label['name'])
+        self.insert_ticket(ticket)
       return True
     return False
     
   def scrape_jira(self, start=1):
     more = True
-    ticket = start
+    ticket_num = start
     while more:
-      more = self._jira_loop(ticket)
-      ticket += 1
-    print 'could not get ticket #', ticket
+      more = self._jira_loop(ticket_num)
+      ticket_num += 1
+    print 'could not get ticket #', ticket_num
 
-  def _jira_loop(self, ticket):
-    a = requests.get(self.url + self.project + '-' + str(ticket) + '/')
+  def _jira_loop(self, ticket_num):
+    a = requests.get(self.url + self.project + '-' + str(ticket_num) + '/')
     if not a.ok:
       return False
     bs = BeautifulSoup(a.text,'html.parser')
     for item in bs.findAll('item'):
       try: 
-        self.mongo_coll.insert(parse(item.encode('utf-8')))
+        ticket = {'repo_url': self.url + self.project,
+          'project': self.project,
+          'title': item.find("title").text,
+          'body': item.find("description").text,
+          'severity': 3,
+          'ticket_url': item.find("link").text,
+          'created_at': datetime.datetime(item.find("created").text,'%a, %d %b %Y %H:%M%S +0000)'),
+          'labels': list()}
+        for label in item.find("labels").findAll("label"):
+          ticket['labels'].append(label.text)
+        self.insert_ticket(ticket)
       except:
-        print 'error. call _jira_loop with ticket ' + str(ticket)
+        print 'error. call _jira_loop with ticket ' + str(ticket_num)
         return item
-      ticket += 1
+      ticket_num += 1
     return True
 
   def scrape_rpc(self, start=1):
     server = xmlrpclib.Server(self.url)
     tickets = server.ticket.query('max=0')
-    for ticket in tickets[start-1:]:
-      a = server.ticket.get(ticket)
+    for ticket_num in tickets[start-1:]:
+      a = server.ticket.get(ticket_num)
       for x in a:
         if type(x) == dict:
-          try:
-            coll.insert(x)
-          except InvalidDocument:
-            for k in x.keys():
-              try:
-                bson.BSON.encode({k: x[k]})
-              except InvalidDocument:
-                x.pop(k)
-            coll.insert(x)
+          ticket = {'repo_url': server_url,
+                    'project': self.project,
+                    'title': b['summary'],
+                    'body': b['description'],
+                    'severity': 3,
+                    'ticket_url': '',
+                    'created_at': datetime.datetime.strptime(c.__str__(),'%Y%m%dT%H:%M:%S'),
+                    'labels': [b['type']]
+          }
+          self.insert_ticket(ticket)
+
+  def insert_ticket(self, ticket):
+    for col in ticketScraper.required_cols:
+      if col not in ticket:
+        raise missingCol(col)
+    self.mongo_coll.insert(ticket)
+    return
+
+class missingCol(Exception):
+    def __init__(self,col):
+        self.args = ["missing attribute: " + col]

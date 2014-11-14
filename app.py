@@ -26,11 +26,11 @@ def flag():
     flag = request.form['flag']
     event_id = request.form['id']
     a = coll.find({"_id": ObjectId(event_id)}).next()
-    labels = a['json']['labels']
-    labels = [l for l in labels if l['name'].lower() not in mutually_exclusive_labels]
+    labels = a['labels']
+    labels = [l for l in labels if l.lower() not in mutually_exclusive_labels]
     if flag.lower() in mutually_exclusive_labels:
       labels.append({'name': flag.lower()})
-    a['json']['labels'] = labels
+    a['labels']= labels
     b =  coll.update({"_id": a['_id']},a)
     return str(a)
 
@@ -40,15 +40,14 @@ def data():
 
 def get_data():
     results = {'children': []}
-    for entry in coll.find().sort([("json.created_at", pymongo.DESCENDING)]).limit(100):
+    for entry in coll.find().sort([("created_at", pymongo.DESCENDING)]).limit(100):
         result = {'_id' : str(entry['_id']),
-                  'title': entry['json']['title'],
-                  'guesses': entry['json']['guesses'],
+                  'title': entry['title'],
+                  'guesses': entry['guesses'],
                   'url': '/get_ticket?raw=true&tid=' + str(entry['_id']),
-                  'text': entry['json']['text'],
-                  'guesses': entry['json']['guesses'],
-                  'created_at': entry['json']['created_at'],
-                  'priority': entry['json']['priority']}
+                  'text': entry['title'] if entry['title'] else '' + entry['body'] if entry['body'] else '',
+                  'created_at': entry['created_at'],
+                  'priority': entry['severity']}
         results['children'].append(result)
     return results
 
@@ -84,7 +83,7 @@ def utility_processor():
 
 if __name__ == '__main__':
     client = MongoClient('mongodb://localhost:27017/')
-    db = client['helpdesk']
-    coll = db['github_saltstack']
+    db = client['hd-test']
+    coll = db['salt']
 
     app.run(host='0.0.0.0', port=7000, debug=True)
