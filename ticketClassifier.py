@@ -49,7 +49,7 @@ class ticketClassifier(object):
     self.fit_and_predict_for_categories()
     self.update_mongo()
     if self.clean_up:
-        self.clean_up()
+        self._clean_up()
 
   def extract_features(self):
     self.X = []
@@ -99,7 +99,7 @@ class ticketClassifier(object):
     labeled_counts = vec.transform(' '.join(x) for x in self.X)
     self.labeled_probas = lda.inference(gensim.matutils.Sparse2Corpus(labeled_counts.T))[0]
 
-    w2vmodel = Word2Vec(all_sentences, size=100, window=5, min_count=3, workers=4)
+    w2vmodel = Word2Vec(self.all_sentences, size=100, window=5, min_count=3, workers=4)
 
     best_centroids = None
     best_score = None
@@ -113,21 +113,21 @@ class ticketClassifier(object):
     km.centroids = best_centroids
 
     self.tfidf = TfidfVectorizer(stop_words=set(stopwords.words()))
-    self.all_t = tfidf.fit_transform(' '.join(x) for x in self.all_sentences)
-    self.labeled_t = tfidf.transform(' '.join(x) for x in self.X)
+    self.all_t = self.tfidf.fit_transform(' '.join(x) for x in self.all_sentences)
+    self.labeled_t = self.tfidf.transform(' '.join(x) for x in self.X)
 
     self.all_kmeans = kmeans_word2vecify(self.all_sentences,w2vmodel,km,self.all_t,self.tfidf)
     self.labeled_kmeans = kmeans_word2vecify(self.X,w2vmodel,km,self.labeled_t,self.tfidf)
 
   def fit_and_predict_for_categories(self):
     self.labels_raw =  self.all_or_nothing_vectors.keys()
-    guesses_raw = map(lambda x: fit_and_predict_for_category(all_or_nothing_vectors[x]),labels_raw)
+    guesses_raw = map(lambda x: self.fit_and_predict_for_category(self.all_or_nothing_vectors[x]),self.labels_raw)
     self.guesses_zipped = zip(*guesses_raw)
 
   def fit_and_predict_for_category(self, y_vector):
 
     lr_lda = LogisticRegression()
-    lr_lda.fit(labeled_probas,y_vector)
+    lr_lda.fit(self.labeled_probas,y_vector)
     lr_tfidf = LogisticRegression()
     lr_tfidf.fit(self.labeled_t, y_vector)
     svc_kmeans = SVC(probability=True)
@@ -150,10 +150,10 @@ class ticketClassifier(object):
   def update_mongo(self):
     for i, g in enumerate(self.guesses_zipped):
         guess = {c[0]: c[1] for c in zip(self.labels_raw,g)}
-        tid = ids[i]
+        tid = self.ids[i]
         self.mongo_coll.update({'_id':tid},{"$set":{"guesses": guess}})
 
-  def clean_up(self):
+  def _clean_up(self):
     self.X = None
     self.ids = None
     self.all_sentences = None
