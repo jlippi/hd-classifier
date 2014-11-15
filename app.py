@@ -42,7 +42,7 @@ def data():
 
 def get_data():
     results = {'children': []}
-    for entry in coll.find().sort([("created_at", pymongo.DESCENDING)]).limit(1000):
+    for entry in coll.find().sort([("created_at", pymongo.DESCENDING)]).limit(200):
         result = {'_id' : str(entry['_id']),
                   'title': entry['title'],
                   'guesses': entry['guesses'],
