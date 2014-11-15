@@ -1,4 +1,5 @@
 from pymongo import MongoClient
+import datetime
 import requests
 from requests.auth import HTTPBasicAuth
 import xmlrpclib
@@ -104,14 +105,14 @@ class ticketScraper(object):
       a = server.ticket.get(ticket_num)
       for x in a:
         if type(x) == dict:
-          ticket = {'repo_url': server_url,
+          ticket = {'repo_url': self.url,
                     'project': self.project,
-                    'title': b['summary'],
-                    'body': b['description'],
+                    'title': x['summary'],
+                    'body': x['description'],
                     'severity': 3,
                     'ticket_url': '',
-                    'created_at': datetime.datetime.strptime(c.__str__(),'%Y%m%dT%H:%M:%S'),
-                    'labels': [b['type']]
+                    'created_at': datetime.datetime.strptime(x['time'].__str__(),'%Y%m%dT%H:%M:%S'),
+                    'labels': [x['type']]
           }
           self.insert_ticket(ticket)
 
@@ -125,6 +126,12 @@ class ticketScraper(object):
         
     self.mongo_coll.insert(ticket)
     return
+
+  def get_labels(self):
+    labels = set()
+    for x in self.mongo_coll.find():
+      labels.update(x['labels'])
+    return labels
 
 class missingCol(Exception):
     def __init__(self,col):

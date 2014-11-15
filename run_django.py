@@ -11,6 +11,20 @@ DJANGO_parms = {'tracker': 'rpc',
               'mongo_coll': db['django'],
               'url': 'https://code.djangoproject.com/xmlrpc',
               'auth': (os.getenv('GH_USER'),os.getenv('GH_PASS'))}
+DJANGO_parms['mutually_exclusive_labels'] = ['Cleanup/Optimization',
+                                             'Bug',
+                                             'enhancement']
+DJANGO_parms['labeldict'] = { 
+  'Cleanup/optimization': 'Cleanup/optimization',
+  'defect': 'Bug',
+  'enhancement': 'enhancement',
+  'bug / defect': 'Bug',
+  'New feature': 'enhancement',
+  'task': 'unk',
+  u'd\xe9faut': 'unk',
+  'Uncategorized': 'unk',
+  'Bug': 'Bug',
+  u'': 'unk' } 
 
 # SALT_parms['mutually_exclusive_labels'] = ['Bug','Feature','Documentation']
 # SALT_parms['labeldict'] = {'Bug': 'Bug',
@@ -53,10 +67,10 @@ DJANGO_parms = {'tracker': 'rpc',
 #              'Blocker': 'unk',
 #              'uncategorized':'unk'}
 
-print 'start scraping'
-ts = ticketScraper(DJANGO_parms)
-ts.run()
+#ts = ticketScraper(DJANGO_parms)
+#ts.run()
+#print ts.get_labels()
 
-# print 'done scraping. start classifying'
-# tc = ticketClassifier(SALT_parms)
-# tc.run()
+print 'done scraping. start classifying'
+tc = ticketClassifier(DJANGO_parms)
+tc.run()
