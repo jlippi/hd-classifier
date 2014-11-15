@@ -86,4 +86,4 @@ if __name__ == '__main__':
     client = MongoClient('mongodb://localhost:27017/')
     db = client['hd-test']
     coll = db['salt']
-    app.run(host='0.0.0.0', port=7001, debug=True)
+    app.run(host='0.0.0.0', port=8142, debug=True)
