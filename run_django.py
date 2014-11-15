@@ -54,7 +54,7 @@ DJANGO_parms = {'tracker': 'rpc',
 #              'uncategorized':'unk'}
 
 print 'start scraping'
-ts = ticketScraper(SALT_parms)
+ts = ticketScraper(DJANGO_parms)
 ts.run()
 
 # print 'done scraping. start classifying'
