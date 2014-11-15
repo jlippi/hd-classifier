@@ -53,7 +53,7 @@ SALT_parms['labeldict'] = {'Bug': 'Bug',
              'uncategorized':'unk'}
 
 print 'start scraping'
-ts = ticketClassifier(SALT_parms)
+ts = ticketScraper(SALT_parms)
 ts.run()
 
 print 'done scraping. start classifying'
