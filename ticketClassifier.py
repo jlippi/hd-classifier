@@ -16,7 +16,7 @@ from gensim.corpora.textcorpus import TextCorpus
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import roc_curve, roc_auc_score
 import seaborn
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 from sklearn.svm import SVC
 
 from j_kmeans import Kmeans

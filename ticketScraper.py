@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup
 from lxml import objectify
 import json
 import lxml
-from xmltodict import parse
+#from xmltodict import parse
 
 class ticketScraper(object):
   required_cols = ['labels','title','severity','ticket_url',
