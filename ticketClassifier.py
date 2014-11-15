@@ -8,7 +8,7 @@ import re
 import numpy as np
 import gensim
 from gensim.models import Word2Vec
-from gensim.models import Doc2Vec
+#from gensim.models import Doc2Vec
 from gensim.models.doc2vec import LabeledSentence
 from gensim.models.ldamodel import LdaModel
 from gensim.models.ldamulticore import LdaMulticore
