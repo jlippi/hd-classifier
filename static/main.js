@@ -9,9 +9,6 @@ $(function() {
 var data;
 var details_url; // this is necessary so that the details page can be refreshed
 
-var width = 1000; // chart width
-var height = 500; // chart height
-
 var tooltip;
 var curr_cat = 'feature'
 
@@ -27,8 +24,6 @@ function refreshData() {
           labels[key] = true;
         }
       }
-      drawButtons();
-      drawGraph(data);
   });
 }
 
@@ -43,14 +38,17 @@ function drawButtons() {
       .datum(label)
       .on("click", function(l) {
         curr_cat = l; 
-        drawGraph(data); })
+        drawGraph(); })
       .text(label)
       .attr("class","labelText")
       .style("background-color", label_colors)
     }
 }
 
-function drawGraph(tickets) {
+function drawGraph() {
+  var tickets = data
+  var width = d3.select(".container").style('width')
+  var height = width/1.618
   var xPosition = d3.scale.linear().domain([tickets.children.length,0]).range([0,width])
   var yPosition = d3.scale.linear().domain([0,1]).range([height,0])
   var radiusScaler = d3.scale.pow().domain([1,5]).range([10,35])
@@ -129,5 +127,9 @@ function createGraph() {
     .text("tooltip");
 
   refreshData();
+  drawButtons();
+  drawGraph();
+
+  d3.select('.container').on("resize",drawGraph);
 
 }
