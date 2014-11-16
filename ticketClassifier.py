@@ -37,18 +37,30 @@ class ticketClassifier(object):
     self.urls = None
     self.all_or_nothing_vectors = None
     self.tfidf = None
-    self.all_t = None
-    self.labeled_t = None
-    self.all_kmeans = None
-    self.labeled_kmeans = None
     self.labels_raw = None
     self.guesses_zipped = None
+
+    self.d = {}
+    self.d['labeled'] = {}
+    self.d['all'] = {}
+
+    self.d['labeled']['_t'] = None
+    self.d['labeled']['_probas'] = None
+    self.d['labeled']['_kmeans'] = None
+
+    self.d['all']['_t'] = None
+    self.d['all']['_probas'] = None
+    self.d['all']['_kmeans'] = None
+
+    self.lr_tfidf = None
+    self.lr_lda = None
+    self.svc_kmeans = None
 
   def run(self):
     self.extract_features()
     print self.all_or_nothing_vectors
     self.fit_universal_models()
-    self.fit_and_predict_for_categories()
+    self.fit_and_predict()
     self.update_mongo()
     if self.clean_up:
         self._clean_up()
@@ -102,9 +114,9 @@ class ticketClassifier(object):
       lda.save('lda.modl')
 
     all_counts = vec.transform(' '.join(x) for x in self.all_sentences)
-    self.all_probas = np.array(lda.inference(gensim.matutils.Sparse2Corpus(all_counts.T))[0])
+    self.d['all']['_probas'] = np.array(lda.inference(gensim.matutils.Sparse2Corpus(all_counts.T))[0])
     labeled_counts = vec.transform(' '.join(x) for x in self.X)
-    self.labeled_probas = np.array(lda.inference(gensim.matutils.Sparse2Corpus(labeled_counts.T))[0])
+    self.d['labeled']['_probas'] = np.array(lda.inference(gensim.matutils.Sparse2Corpus(labeled_counts.T))[0])
 
     w2vmodel = Word2Vec(self.all_sentences, size=100, window=5, min_count=3, workers=4)
 
@@ -120,45 +132,50 @@ class ticketClassifier(object):
     km.centroids = best_centroids
 
     self.tfidf = TfidfVectorizer(stop_words=set(stopwords.words()))
-    self.all_t = self.tfidf.fit_transform(' '.join(x) for x in self.all_sentences)
-    self.labeled_t = self.tfidf.transform(' '.join(x) for x in self.X)
+    self.d['all']['_t'] = self.tfidf.fit_transform(' '.join(x) for x in self.all_sentences)
+    self.d['labeled']['_t'] = self.tfidf.transform(' '.join(x) for x in self.X)
 
-    self.all_kmeans = np.array(kmeans_word2vecify(self.all_sentences,w2vmodel,km,self.all_t,self.tfidf))
-    self.labeled_kmeans = np.array(kmeans_word2vecify(self.X,w2vmodel,km,self.labeled_t,self.tfidf))
+    self.d['all']['_kmeans'] = np.array(kmeans_word2vecify(self.all_sentences,w2vmodel,km,self.d['all']['_t'],self.tfidf))
+    self.d['labeled']['_kmeans'] = np.array(kmeans_word2vecify(self.X,w2vmodel,km,self.d['labeled']['_t'],self.tfidf))
 
-  def fit_and_predict_for_categories(self):
+  def fit_and_predict(self):
     self.labels_raw =  self.all_or_nothing_vectors.keys()
-    y_multinom = np.argmax(zip(*[self.all_or_nothing_vectors[l] for l in self.labels_raw]),axis=1)
-    self.guesses = self.fit_and_predict_for_category(y_multinom)
-    #guesses_raw = map(lambda x: self.fit_and_predict_for_category(self.all_or_nothing_vectors[x]),self.labels_raw)
-    #self.guesses_zipped = zip(*guesses_raw)
+    self.d['labeled']['_y'] = np.argmax(zip(*[self.all_or_nothing_vectors[l] for l in self.labels_raw]),axis=1)
+    #self.guesses = self.fit_and_predict_for_category(self.d['labeled']['_y'])
 
-  def fit_and_predict_for_category(self, y_vector, idx=None):
-    
+    self.fit_ensemble('labeled')
+    self.predict_ensemble('all')
+
+  def fit_ensemble(self, dat, idx=None):
+
     if not idx:
-        idx = np.array([True] * len(y_vector))
-    lr_lda = LogisticRegression()
-    lr_lda.fit(self.labeled_probas[idx],y_vector[idx])
-    lr_tfidf = LogisticRegression()
-    lr_tfidf.fit(self.labeled_t[idx], y_vector[idx])
-    svc_kmeans = SVC(probability=True)
-    svc_kmeans.fit(self.labeled_kmeans[idx],y_vector[idx])
+        idx = np.array([True] * self.d[dat]['_t'].shape[0])
+
+    self.lr_lda = LogisticRegression()
+    self.lr_lda.fit(self.d[dat]['_probas'][idx],self.d[dat]['_y'][idx])
+    self.lr_tfidf = LogisticRegression()
+    self.lr_tfidf.fit(self.d[dat]['_t'][idx], self.d[dat]['_y'][idx])
+    self.svc_kmeans = SVC(probability=True)
+    self.svc_kmeans.fit(self.d['labeled']['_kmeans'][idx], self.d[dat]['_y'][idx])
     lr_ensemble_labeled_X = np.hstack((
-                               lr_tfidf.predict_proba(self.labeled_t[idx]),
-                               lr_lda.predict_proba(self.labeled_probas[idx]),
-                               svc_kmeans.predict_proba(self.labeled_kmeans[idx])
+                               self.lr_tfidf.predict_proba(self.d[dat]['_t'][idx]),
+                               self.lr_lda.predict_proba(self.d[dat]['_probas'][idx]),
+                               self.svc_kmeans.predict_proba(self.d[dat]['_kmeans'][idx])
                                ))
     lr_ensemble = LogisticRegression()
-    lr_ensemble.fit(lr_ensemble_labeled_X,y_vector[idx])
+    lr_ensemble.fit(lr_ensemble_labeled_X,self.d[dat]['_y'][idx])
+    
+
+  def predict_ensemble(self, dat, idx=None):
+    if not idx:
+        idx = np.array([True] * self.d[dat]['_t'].shape[0])
+    
     lr_all_sentences = np.hstack((
-                           lr_tfidf.predict_proba(self.all_t),
-                           lr_lda.predict_proba(self.all_probas),
-                           svc_kmeans.predict_proba(self.all_kmeans)
+                           self.lr_tfidf.predict_proba(self.d[dat]['_t']),
+                           self.lr_lda.predict_proba(self.d[dat]['_probas']),
+                           self.svc_kmeans.predict_proba(self.d[dat]['_kmeans'])
                            ))
-    #all_preds = np.array(lr_ensemble.predict_proba(lr_all_sentences)[:,1])
-    all_pred_probas = np.array(lr_ensemble.predict_proba(lr_all_sentences))
-    all_preds = np.array(lr_ensemble.predict(lr_all_sentences))
-    return all_preds, all_pred_probas
+    return np.array(lr_ensemble.predict_proba(lr_all_sentences))
 
   def update_mongo(self):
     for i, g in enumerate(self.guesses):
@@ -175,10 +192,10 @@ class ticketClassifier(object):
     self.urls = None
     self.all_or_nothing_vectors = None
     self.tfidf = None
-    self.all_t = None
-    self.labeled_t = None
-    self.all_kmeans = None
-    self.labeled_kmeans = None
+    self.d['all']['_t'] = None
+    self.d['labeled']['_t'] = None
+    self.d['all']['_kmeans'] = None
+    self.d['labeled']['_kmeans'] = None
     self.labels_raw = None
     self.guesses_zipped = None
     self.parms = None
