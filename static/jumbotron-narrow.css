@@ -44,7 +44,7 @@ body {
 /* Customize container */
 @media (min-width: 768px) {
   .container {
-    max-width: 75%;
+    max-width: 65%;
   }
 }
 .container-narrow > hr {
@@ -70,7 +70,7 @@ body {
 }
 
 /* Responsive: Portrait tablets and up */
-@media screen and (min-width: 75%) {
+@media screen and (min-width: 65%) {
   /* Remove the padding we set earlier */
   .header,
   .marketing,
