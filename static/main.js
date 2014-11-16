@@ -49,8 +49,8 @@ function drawButtons() {
 
 function drawGraph() {
   var tickets = data
-  var width = d3.select(".container").style('width')
-  var height = width/1.618
+  var width = parseInt(d3.select(".container").style('width'))
+  var height = parseInt(width/1.618)
   var xPosition = d3.scale.linear().domain([tickets.children.length,0]).range([0,width])
   var yPosition = d3.scale.linear().domain([0,1]).range([height,0])
   var radiusScaler = d3.scale.pow().domain([1,5]).range([10,35])
