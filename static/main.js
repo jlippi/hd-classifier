@@ -24,6 +24,8 @@ function refreshData() {
           labels[key] = true;
         }
       }
+      drawButtons();
+      drawGraph();
   });
 }
 
@@ -127,8 +129,6 @@ function createGraph() {
     .text("tooltip");
 
   refreshData();
-  drawButtons();
-  drawGraph();
 
   d3.select('.container').on("resize",drawGraph);
 
