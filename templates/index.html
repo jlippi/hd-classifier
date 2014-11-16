@@ -3,10 +3,9 @@
   <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
   <script src="http://code.jquery.com/jquery-2.1.0.min.js"></script>
   <script src="{{ url_for('static', filename='main.js') }}"></script>
-  <link rel="stylesheet" href="{{ url_for('static', filename='dashboard.css') }}" />
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap-theme.min.css">
-  <link href="{{ url_for('static', filename='jumbotron-narrow.css') }}" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='dashboard.css') }}" />
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
 </head>
 <body>
@@ -19,23 +18,25 @@
             <li role="presentation"><a href="#">Contact</a></li>
           </ul>
         </nav>
-        <h3 class="text-muted">Project name</h3>
+        <h3 class="text-muted">Helpdesk ticket classifier - django tickets</h3>
       </div>
 
-      <div id="chart" class="row placeholders"></div>
+      <div class="project">
+        <div id="chart" class="row placeholders"></div>
 
-      <div class="row marketing">
-        <div class='text_div'></div>
-      </div>
+        <div class="row pad">
+          <div class='text_div'></div>
+        </div>
 
-      <div class="row marketing">
-           <div>
-             <g class="ticket_detail"></g>
-           </div>
+        <div class="row pad">
+             <div>
+               <g class="ticket_detail"></g>
+             </div>
+        </div>
       </div>
 
       <footer class="footer">
-        <p>&copy; Company 2014</p>
+        <p>&copy; Justin Lippi 2014</p>
       </footer>
 
     </div> <!-- /container -->

@@ -10,7 +10,7 @@ var data;
 var details_url; // this is necessary so that the details page can be refreshed
 
 var tooltip;
-var curr_cat = 'feature'
+var curr_cat;
 
 var labels = {};
 var label_colors = d3.scale.category10();
@@ -25,6 +25,7 @@ function refreshData() {
         }
       }
       drawButtons();
+      curr_cat = Object.keys(labels)[0]
       drawGraph();
   });
 }
@@ -53,8 +54,7 @@ function drawGraph() {
   var height = parseInt(width/1.618)
   var xPosition = d3.scale.linear().domain([tickets.children.length,0]).range([0,width])
   var yPosition = d3.scale.linear().domain([0,1]).range([height,0])
-  var radiusScaler = d3.scale.pow().domain([1,5]).range([10,35])
-  var color = d3.scale.category20b();  // create ordial scale with 20 colors
+  var radiusScaler = d3.scale.pow().domain([1,5]).range([10,20])
 
   d3.select(".bubble").remove();
 
@@ -107,7 +107,9 @@ function drawGraph() {
 function showDetails() {
    url = details_url;
    $.get(url).done( function(d)  {
-     $('.ticket_detail').html(d); });
+     $('.ticket_detail').html(d); 
+     $('.ticket_detail')[0].scrollIntoView( true );
+   });
 }
 
 function createGraph() {
@@ -130,6 +132,8 @@ function createGraph() {
 
   refreshData();
 
-  d3.select('.container').on("resize",drawGraph);
+  $(window).resize(function() {
+    drawGraph();
+  });
 
 }

@@ -102,9 +102,9 @@ class ticketClassifier(object):
       lda.save('lda.modl')
 
     all_counts = vec.transform(' '.join(x) for x in self.all_sentences)
-    self.all_probas = lda.inference(gensim.matutils.Sparse2Corpus(all_counts.T))[0]
+    self.all_probas = np.array(lda.inference(gensim.matutils.Sparse2Corpus(all_counts.T))[0])
     labeled_counts = vec.transform(' '.join(x) for x in self.X)
-    self.labeled_probas = lda.inference(gensim.matutils.Sparse2Corpus(labeled_counts.T))[0]
+    self.labeled_probas = np.array(lda.inference(gensim.matutils.Sparse2Corpus(labeled_counts.T))[0])
 
     w2vmodel = Word2Vec(self.all_sentences, size=100, window=5, min_count=3, workers=4)
 
@@ -123,42 +123,49 @@ class ticketClassifier(object):
     self.all_t = self.tfidf.fit_transform(' '.join(x) for x in self.all_sentences)
     self.labeled_t = self.tfidf.transform(' '.join(x) for x in self.X)
 
-    self.all_kmeans = kmeans_word2vecify(self.all_sentences,w2vmodel,km,self.all_t,self.tfidf)
-    self.labeled_kmeans = kmeans_word2vecify(self.X,w2vmodel,km,self.labeled_t,self.tfidf)
+    self.all_kmeans = np.array(kmeans_word2vecify(self.all_sentences,w2vmodel,km,self.all_t,self.tfidf))
+    self.labeled_kmeans = np.array(kmeans_word2vecify(self.X,w2vmodel,km,self.labeled_t,self.tfidf))
 
   def fit_and_predict_for_categories(self):
     self.labels_raw =  self.all_or_nothing_vectors.keys()
-    guesses_raw = map(lambda x: self.fit_and_predict_for_category(self.all_or_nothing_vectors[x]),self.labels_raw)
-    self.guesses_zipped = zip(*guesses_raw)
+    y_multinom = np.argmax(zip(*[self.all_or_nothing_vectors[l] for l in self.labels_raw]),axis=1)
+    self.guesses = self.fit_and_predict_for_category(y_multinom)
+    #guesses_raw = map(lambda x: self.fit_and_predict_for_category(self.all_or_nothing_vectors[x]),self.labels_raw)
+    #self.guesses_zipped = zip(*guesses_raw)
 
-  def fit_and_predict_for_category(self, y_vector):
-
+  def fit_and_predict_for_category(self, y_vector, idx=None):
+    
+    if not idx:
+        idx = np.array([True] * len(y_vector))
     lr_lda = LogisticRegression()
-    lr_lda.fit(self.labeled_probas,y_vector)
+    lr_lda.fit(self.labeled_probas[idx],y_vector[idx])
     lr_tfidf = LogisticRegression()
-    lr_tfidf.fit(self.labeled_t, y_vector)
+    lr_tfidf.fit(self.labeled_t[idx], y_vector[idx])
     svc_kmeans = SVC(probability=True)
-    svc_kmeans.fit(self.labeled_kmeans,y_vector)
+    svc_kmeans.fit(self.labeled_kmeans[idx],y_vector[idx])
     lr_ensemble_labeled_X = np.hstack((
-                               lr_tfidf.predict_proba(self.labeled_t)[:,0].reshape(-1,1),
-                               lr_lda.predict_proba(self.labeled_probas)[:,0].reshape(-1,1),
-                               svc_kmeans.predict_proba(self.labeled_kmeans)[:,0].reshape(-1,1)
+                               lr_tfidf.predict_proba(self.labeled_t[idx]),
+                               lr_lda.predict_proba(self.labeled_probas[idx]),
+                               svc_kmeans.predict_proba(self.labeled_kmeans[idx])
                                ))
     lr_ensemble = LogisticRegression()
-    lr_ensemble.fit(lr_ensemble_labeled_X,y_vector)
+    lr_ensemble.fit(lr_ensemble_labeled_X,y_vector[idx])
     lr_all_sentences = np.hstack((
-                           lr_tfidf.predict_proba(self.all_t)[:,0].reshape(-1,1),
-                           lr_lda.predict_proba(self.all_probas)[:,0].reshape(-1,1),
-                           svc_kmeans.predict_proba(self.all_kmeans)[:,0].reshape(-1,1)
+                           lr_tfidf.predict_proba(self.all_t),
+                           lr_lda.predict_proba(self.all_probas),
+                           svc_kmeans.predict_proba(self.all_kmeans)
                            ))
-    all_preds = np.array(lr_ensemble.predict_proba(lr_all_sentences)[:,1])
-    return all_preds
+    #all_preds = np.array(lr_ensemble.predict_proba(lr_all_sentences)[:,1])
+    all_pred_probas = np.array(lr_ensemble.predict_proba(lr_all_sentences))
+    all_preds = np.array(lr_ensemble.predict(lr_all_sentences))
+    return all_preds, all_pred_probas
 
   def update_mongo(self):
-    for i, g in enumerate(self.guesses_zipped):
+    for i, g in enumerate(self.guesses):
         guess = {c[0]: c[1] for c in zip(self.labels_raw,g)}
+        buest_guess = sorted(guess.iteritems(),reverse=True,key=lambda x: x[1])[0][0]
         tid = self.ids[i]
-        self.mongo_coll.update({'_id':tid},{"$set":{"guesses": guess}})
+        self.mongo_coll.update({'_id':tid},{"$set":{"guesses": guess,"best_guess": best_guess}})
 
   def _clean_up(self):
     self.X = None
