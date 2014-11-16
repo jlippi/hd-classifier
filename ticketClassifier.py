@@ -5,6 +5,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from nltk.corpus import stopwords
 from nltk.stem import SnowballStemmer
 import re
+import os
 import numpy as np
 import gensim
 from gensim.models import Word2Vec
@@ -99,7 +100,7 @@ class ticketClassifier(object):
     else:
       lda = LdaMulticore(corpus=vec_corpus,id2word=id2word,iterations=200,num_topics=2,passes=10,workers=4)
       lda.save('lda.modl')
-      
+
     all_counts = vec.transform(' '.join(x) for x in self.all_sentences)
     self.all_probas = lda.inference(gensim.matutils.Sparse2Corpus(all_counts.T))[0]
     labeled_counts = vec.transform(' '.join(x) for x in self.X)
