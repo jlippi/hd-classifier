@@ -94,7 +94,12 @@ class ticketClassifier(object):
     id2word = {v: k for k, v in vec.vocabulary_.iteritems()}
     vec_corpus = gensim.matutils.Sparse2Corpus(vec_t.T)
 
-    lda = LdaMulticore(corpus=vec_corpus,id2word=id2word,iterations=200,num_topics=2,passes=10,workers=4)
+    if os.path.isfile('lda.modl'):
+      lda = LdaMulticore.load('lda.modl')
+    else:
+      lda = LdaMulticore(corpus=vec_corpus,id2word=id2word,iterations=200,num_topics=2,passes=10,workers=4)
+      lda.save('lda.modl')
+      
     all_counts = vec.transform(' '.join(x) for x in self.all_sentences)
     self.all_probas = lda.inference(gensim.matutils.Sparse2Corpus(all_counts.T))[0]
     labeled_counts = vec.transform(' '.join(x) for x in self.X)
