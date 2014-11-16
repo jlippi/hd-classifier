@@ -5,6 +5,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from nltk.corpus import stopwords
 from nltk.stem import SnowballStemmer
 import re
+import os
 import numpy as np
 import gensim
 from gensim.models import Word2Vec
