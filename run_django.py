@@ -11,7 +11,7 @@ DJANGO_parms = {'tracker': 'rpc',
               'mongo_coll': db['django'],
               'url': 'https://code.djangoproject.com/xmlrpc',
               'auth': (os.getenv('GH_USER'),os.getenv('GH_PASS'))}
-DJANGO_parms['mutually_exclusive_labels'] = ['Cleanup/Optimization',
+DJANGO_parms['mutually_exclusive_labels'] = ['Cleanup/optimization',
                                              'Bug',
                                              'enhancement']
 DJANGO_parms['labeldict'] = { 

@@ -45,6 +45,7 @@ class ticketClassifier(object):
 
   def run(self):
     self.extract_features()
+    print self.all_or_nothing_vectors
     self.fit_universal_models()
     self.fit_and_predict_for_categories()
     self.update_mongo()
