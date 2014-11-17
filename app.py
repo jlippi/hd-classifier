@@ -21,9 +21,13 @@ app = Flask(__name__)
 
 @app.route('/')
 def redir():
-    return redirect('/project')
+    return redirect('/hd-ticket')
 
 @app.route('/project')
+def redir2():
+    return redirect('/hd-ticket')
+
+@app.route('/hd-ticket')
 def index():
     return render_template('project.html')
 
