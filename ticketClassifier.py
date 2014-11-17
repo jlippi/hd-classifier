@@ -16,6 +16,7 @@ from gensim.models.ldamulticore import LdaMulticore
 from gensim.corpora.textcorpus import TextCorpus
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import roc_curve, roc_auc_score
+from sklearn.naive_bayes import MultinomialNB
 import seaborn
 #import matplotlib.pyplot as plt
 from sklearn.svm import SVC
@@ -98,6 +99,9 @@ class ticketClassifier(object):
     for x in self.all_or_nothing_vectors:
         self.all_or_nothing_vectors[x] = np.array(self.all_or_nothing_vectors[x])
 
+    self.labels_raw =  self.all_or_nothing_vectors.keys()
+    self.d['labeled']['_y'] = np.argmax(zip(*[self.all_or_nothing_vectors[l] for l in self.labels_raw]),axis=1)
+
 
   def fit_universal_models(self):
 
@@ -139,17 +143,18 @@ class ticketClassifier(object):
     self.d['labeled']['_kmeans'] = np.array(kmeans_word2vecify(self.X,w2vmodel,km,self.d['labeled']['_t'],self.tfidf))
 
   def fit_and_predict(self):
-    self.labels_raw =  self.all_or_nothing_vectors.keys()
-    self.d['labeled']['_y'] = np.argmax(zip(*[self.all_or_nothing_vectors[l] for l in self.labels_raw]),axis=1)
-    #self.guesses = self.fit_and_predict_for_category(self.d['labeled']['_y'])
 
     self.fit_ensemble('labeled')
     self.predict_ensemble('all')
 
   def fit_ensemble(self, dat, idx=None):
 
-    if not idx:
+    if idx is None:
         idx = np.array([True] * self.d[dat]['_t'].shape[0])
+
+    #self.lr_ensemble = MultinomialNB()
+    #self.lr_ensemble.fit(self.d[dat]['_t'][idx], self.d[dat]['_y'][idx])
+    #return
 
     self.lr_lda = LogisticRegression()
     self.lr_lda.fit(self.d[dat]['_probas'][idx],self.d[dat]['_y'][idx])
@@ -158,29 +163,33 @@ class ticketClassifier(object):
     self.svc_kmeans = SVC(probability=True)
     self.svc_kmeans.fit(self.d['labeled']['_kmeans'][idx], self.d[dat]['_y'][idx])
     lr_ensemble_labeled_X = np.hstack((
-                               self.lr_tfidf.predict_proba(self.d[dat]['_t'][idx]),
-                               self.lr_lda.predict_proba(self.d[dat]['_probas'][idx]),
-                               self.svc_kmeans.predict_proba(self.d[dat]['_kmeans'][idx])
+                               self.lr_tfidf.predict_proba(self.d[dat]['_t'][idx])[:,1:],
+                               self.lr_lda.predict_proba(self.d[dat]['_probas'][idx])[:,1:],
+                               #self.svc_kmeans.predict_proba(self.d[dat]['_kmeans'][idx])
                                ))
-    lr_ensemble = LogisticRegression()
-    lr_ensemble.fit(lr_ensemble_labeled_X,self.d[dat]['_y'][idx])
+    self.lr_ensemble = LogisticRegression()
+    self.lr_ensemble.fit(lr_ensemble_labeled_X,self.d[dat]['_y'][idx])
     
 
   def predict_ensemble(self, dat, idx=None):
-    if not idx:
+
+    if idx is None:
         idx = np.array([True] * self.d[dat]['_t'].shape[0])
     
+    #self.guesses = np.array(self.lr_ensemble.predict_proba(self.d[dat]['_t'][idx]))
+    #return
+    
     lr_all_sentences = np.hstack((
-                           self.lr_tfidf.predict_proba(self.d[dat]['_t']),
-                           self.lr_lda.predict_proba(self.d[dat]['_probas']),
-                           self.svc_kmeans.predict_proba(self.d[dat]['_kmeans'])
+                           self.lr_tfidf.predict_proba(self.d[dat]['_t'][idx])[:,1:],
+                           self.lr_lda.predict_proba(self.d[dat]['_probas'][idx])[:,1:],
+                           #self.svc_kmeans.predict_proba(self.d[dat]['_kmeans'][idx])
                            ))
-    return np.array(lr_ensemble.predict_proba(lr_all_sentences))
+    self.guesses = np.array(self.lr_ensemble.predict_proba(lr_all_sentences))
 
   def update_mongo(self):
     for i, g in enumerate(self.guesses):
         guess = {c[0]: c[1] for c in zip(self.labels_raw,g)}
-        buest_guess = sorted(guess.iteritems(),reverse=True,key=lambda x: x[1])[0][0]
+        best_guess = sorted(guess.iteritems(),reverse=True,key=lambda x: x[1])[0][0]
         tid = self.ids[i]
         self.mongo_coll.update({'_id':tid},{"$set":{"guesses": guess,"best_guess": best_guess}})
 
