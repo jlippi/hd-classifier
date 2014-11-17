@@ -3,6 +3,7 @@ from flask import request
 from flask import render_template
 from flask import jsonify
 from flask import send_from_directory
+from flask import redirect
 import os
 import requests
 import bs4
@@ -19,8 +20,12 @@ from flask.ext.restful import Resource, fields, reqparse
 app = Flask(__name__)
 
 @app.route('/')
+def redir():
+    return redirect('/project')
+
+@app.route('/project')
 def index():
-    return render_template('index.html')
+    return render_template('project.html')
 
 @app.route('/flag', methods = ['POST'])
 def flag():
