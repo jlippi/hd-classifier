@@ -1,12 +1,12 @@
     {% for i in data %}
     <table>
-        <tr><td>title</td>
+        <tr><td><h3><span class="label label-default">Ticket summary</span></h3></td>
         <td>{{ i['title'] }}</td></tr>
-        <tr><td>body</td><td>{{ i['body'] }}</td></tr>
-        <tr><td>created at</td><td>{{ i['created_at'] }}</td></tr>
-        <tr><td>labels</td><td>{{ i['labels'] }}</td></tr>
-        <tr><td>guesses</td><td>{{ i['guesses'] }}</td></tr>
-        <tr><td>Flag</td><td>
+        <tr><td><h3><span class="label label-default">Ticket text</span></h3></td><td>{{ i['body'] }}</td></tr>
+        <tr><td><h3><span class="label label-default">Ticket creation date</span></h3></td><td>{{ i['created_at'] }}</td></tr>
+        <tr><td><h3><span class="label label-default">Labels assigned</span></h3></td><td>{{ i['labels'] }}</td></tr>
+        <tr><td><h3><span class="label label-default">Guesess</span></h3></td><td>{{ i['guesses'] }}</td></tr>
+        <tr><td><h3><span class="label label-default">Assign label</span></h3></td><td>
           <form action="/flag" class="changeClass" event_id="{{ i['_id'] }}">
             <input type="radio" name="flag{{ i['_id'] }}" value="Bug" {% if has_label(i['labels'],'bug') %}checked{% endif %} >Bug</input><br>
             <input type="radio" name="flag{{ i['_id'] }}" value="Feature"  {% if has_label(i['labels'],'feature') %}checked{% endif %} >Feature</input><br>
