@@ -32,18 +32,21 @@ function refreshData() {
 
 function drawButtons() {
   d3.selectAll(".labelText").remove();
-  var buttons = d3.select(".text_div");
-
+  var buttons = d3.select(".text_div").append("div").attr("class","btn-toolbar").attr("role","toolbar");
 
   for (label in labels) {
     buttons
       .append("div")
+      .attr("class","btn-group")
+      .attr("role","group")
+      .append("a")
       .datum(label)
       .on("click", function(l) {
         curr_cat = l; 
         drawGraph(); })
+      .attr("href","#")
       .text(label)
-      .attr("class","labelText")
+      .attr("class","btn labelText")
       .style("background-color", label_colors)
     }
 }
