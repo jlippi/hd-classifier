@@ -44,28 +44,29 @@
               <h4 class="modal-title" id="myModalLabel">About this product</h4>
             </div>
             <div class="modal-body">
-              <h3>What is this product?</h3><br><br>
+              <h3>What is this product?</h3><br>
               <p>
               This is a helpdesk ticket classification product.  It's currently trained and running on django's tickets.
-              </p>
-              <p>This product automatically classifies all tickets from the django product them based on prior labels</p>
-              <p>It is designed to be modularizable so that it could be applied to any company's helpdesk as easily as possible</p>
-              <p>
-              It uses TFIDF with multinomial logistic regression and Latent Dirichlet Allocation to do this.</p><br>
-              <h3>How to use it:</h3>
-              <p>
-                The most recent 100 tickets are shown.  The tickets furthest to the right are the newest.</p><p>
-                The tickets closest to the top are the ones that are most likely to be the label that is being selected</p><p>
-                To change the label that's selected, just click 'Bug', 'enhancement', or 'Cleanup/optimization' below.
               </p>
               <h3>Why do I care?</h3>
               <p>I'm glad you're asking this question. I used to work at a company with ~1500 employees.  In a company that size, you need a helpdesk to do a lot of things, and someone has to triage where the tickets go.</p>
               <p>I know that if turnaround time could be improved by even a minute per ticket by reducing the amount of work done to triage, this could save the company
               thousands of hours of productivity a year.</p>
               <p>Auto categorization could also help detect important tickets (ie "the building is on fire") quickly, and future algorithms could recognize patterns in incoming tickets to help detect production problems.</p>
+              <h3>So what exactly does it do?</h3>
+              <p>This product automatically classifies all tickets from the django product them based on prior labels</p>
+              <p>It is designed to be modularizable so that it could be applied to any company's helpdesk as easily as possible</p>
+              <p>
+              It uses TFIDF with multinomial logistic regression and Latent Dirichlet Allocation to do this.</p>
+              <h3>How to use it:</h3>
+              <p>
+                The most recent 100 tickets are shown.  The tickets furthest to the right are the newest.</p><p>
+                The tickets closest to the top are the ones that are most likely to be the label that is being selected</p><p>
+                To change the label that's selected, just click 'Bug', 'enhancement', or 'Cleanup/optimization' below.
+              </p>           
               <h3>Where's the code?</h3>
-              <p><a href="http://github.com/jlippi/hd-classifier/">http://github.com/jlippi/hd-classifier</a>
-                <br>Just clone the archive, make sure you have all the necessary libraries and mongod installed, and run run_django.py.</p><p>
+              <p><a href="http://github.com/jlippi/hd-classifier/">http://github.com/jlippi/hd-classifier</a></p>
+              <p>Just clone the archive, make sure you have all the necessary libraries and mongod installed, and run run_django.py.</p><p>
                     Then run app.py and go to http://0.0.0.0:8142/</p> 
             </div>
             <div class="modal-footer">
