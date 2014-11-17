@@ -19,9 +19,9 @@ The algorithm it uses is very simple: TFIDF with multinomial logistic regression
 To just get this up and running, do the following:
 - Clone the archive
 - Make sure you have mongodb server installed and running.
-- python run_django.py (this may take a very long time, up to several hours to do all the scraping and fit the LDA.  Fortunately the big chunk of scraping only needs to happen once and the model only needs to be trained infrequently)
-- python app.py
-- navigate to http://0.0.0.0:8142/
+- $ python run_django.py (this may take a very long time, up to several hours to do all the scraping and fit the LDA.  Fortunately the big chunk of scraping only needs to happen once and the model only needs to be trained infrequently)
+- $ python app.py
+- Navigate to http://0.0.0.0:8142/
 
 By default, the most recent 100 tickets are shown. The tickets furthest to the right are the newest.
 
