@@ -40,7 +40,7 @@ def flag():
     labels = a['labels']
     labels = [l for l in labels if l.lower() not in mutually_exclusive_labels]
     if flag.lower() in mutually_exclusive_labels:
-      labels.append({'name': flag.lower()})
+      labels.append(flag.lower())
     a['labels']= labels
     b =  coll.update({"_id": a['_id']},a)
     return str(a)

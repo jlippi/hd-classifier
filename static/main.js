@@ -1,6 +1,6 @@
 // custom javascript
 
-
+//run createGraph but only if jquery is working
 $(function() {
   console.log('jquery is working!')
   createGraph();
@@ -13,8 +13,9 @@ var tooltip;
 var curr_cat;
 
 var labels = {};
-var label_colors = d3.scale.category10();
+var label_colors = d3.scale.category10(); // color scaler for coloring bubbles
 
+// get the data from the website, redraw the graph and labels
 function refreshData() {
   $.get("/data").done(function (d) {
       data = d;
@@ -25,11 +26,13 @@ function refreshData() {
         }
       }
       drawButtons();
-      curr_cat = Object.keys(labels)[0]
+      //auto set active button to first
+      curr_cat = Object.keys(labels)[0];
       drawGraph();
   });
 }
 
+// add the buttons
 function drawButtons() {
   d3.selectAll(".labelText").remove();
   var buttons = d3.select(".text_div").append("div").attr("class","btn-toolbar").attr("role","toolbar");
@@ -51,6 +54,7 @@ function drawButtons() {
     }
 }
 
+//draw the graph
 function drawGraph() {
   var tickets = data
   var width = parseInt(d3.select(".container").style('width'))
@@ -59,13 +63,16 @@ function drawGraph() {
   var yPosition = d3.scale.linear().domain([0,1]).range([height,0])
   var radiusScaler = d3.scale.pow().domain([1,5]).range([10,20])
 
+  //delete the old graph
   d3.select(".bubble").remove();
 
+  //add a new graph
   var svg = d3.select("#chart").append("svg") // append to DOM
     .attr("width", width)
     .attr("height", height)
     .attr("class", "bubble");
 
+  // add node groups for each point in the graph
   var node = svg.selectAll('.node')
       .data(tickets.children)
       .enter().append('g')
@@ -77,6 +84,7 @@ function drawGraph() {
         return ''}
           );
 
+  // add circles to each node. set their properties
   node.append("circle")
       .attr("r", function(d) { return radiusScaler(d.priority); })
       .style("visibility", function(d) {
@@ -118,9 +126,10 @@ function drawGraph() {
         return tooltip.style("visibility", "hidden");
       })
 
-      svg.append("text").attr("class","y label")
+      //svg.append("text").attr("class","y label")
 }
 
+// when a bubble gets clicked, get its details, put them in the ticket_detail div, and scroll to it
 function showDetails() {
    url = details_url;
    $.get(url).done( function(d)  {
@@ -129,9 +138,8 @@ function showDetails() {
    });
 }
 
+// main function 
 function createGraph() {
-
-  // main config
 
   var format = d3.format(",d");  // convert value to integer
 
@@ -153,5 +161,4 @@ function createGraph() {
     drawGraph();
   });
   $('#howtoModal').modal('show')    
-
 }
