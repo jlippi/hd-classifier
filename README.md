@@ -9,6 +9,9 @@ I know that if turnaround time could be improved by even a minute per ticket by 
 
 Auto categorization could also help detect important tickets (ie "the building is on fire") quickly, and future algorithms could recognize patterns in incoming tickets to help detect production problems.
 
+####See it in action!
+[http://justinlippi.com/hd-ticket](http://justinlippi.com/hd-ticket)
+
 ####So what exactly does it do?
 This product automatically classifies all tickets from the django ticket tracker and classifies them based on assigned labels of other tickets.
 
