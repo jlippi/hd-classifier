@@ -97,6 +97,7 @@ function drawGraph() {
         return label_colors(best_guess_label);
       })
       .on("mouseover", function(d) {
+          d3.select(this).style("fill","blue");
           tooltip.text(d.title);
           tooltip.style("visibility", "visible");
       })
@@ -104,7 +105,18 @@ function drawGraph() {
           return tooltip.style("top", (d3.event.pageY-10)+"px").style("left",(d3.event.pageX+10)+"px");
       })
       .on("click", function(d) { details_url = d.url; showDetails(); })
-      .on("mouseout", function(){return tooltip.style("visibility", "hidden");})
+      .on("mouseout", function(d) {
+        var best_guess_label;
+        var best_guess = 0;
+        for (guess in d.guesses) {
+          if ( d.guesses[guess] > best_guess ) {
+            best_guess = d.guesses[guess];
+            best_guess_label = guess;
+          }
+        }
+        d3.select(this).style("fill",label_colors(best_guess_label));
+        return tooltip.style("visibility", "hidden");
+      })
 
       svg.append("text").attr("class","y label")
 }
