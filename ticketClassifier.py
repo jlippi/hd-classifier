@@ -124,17 +124,16 @@ class ticketClassifier(object):
 
     w2vmodel = Word2Vec(self.all_sentences, size=100, window=5, min_count=3, workers=4)
 
-    #best_centroids = None
-    #best_score = None
-    #for _ in xrange(10):  # todo -- implement kmeans++ instead of best of 10
-    #  km = Kmeans(50)
-    #  km.fit(w2vmodel.syn0)
-    #  score = km.compute_sse(w2vmodel.syn0)
-    #  if best_score is None or score < best_score:
-    #        best_score = score
-    #        best_centroids = km.centroids
-    #km.centroids = best_centroids
-    km = None
+    best_centroids = None
+    best_score = None
+    for _ in xrange(10):  # todo -- implement kmeans++ instead of best of 10
+      km = Kmeans(50)
+      km.fit(w2vmodel.syn0)
+      score = km.compute_sse(w2vmodel.syn0)
+      if best_score is None or score < best_score:
+            best_score = score
+            best_centroids = km.centroids
+    km.centroids = best_centroids
 
     self.tfidf = TfidfVectorizer(stop_words=set(stopwords.words()))
     self.d['all']['_t'] = self.tfidf.fit_transform(' '.join(x) for x in self.all_sentences)
@@ -223,31 +222,28 @@ def token_stem(sentence,stemmer):
     return [stemmer.stem(x) for x in re.findall(u'(?u)\\b\\w\\w+\\b',sentence.lower())]
 
 def kmeans_word2vecify(in_docs,w2vmodel,km,tfidf_t,tfidf):
-    #distances = np.array(km.calc_distances(w2vmodel.syn0))
-    #b = distances == np.min(distances,axis=0)
-    #cluster_distances = np.array(distances).T
-    #closest_clusters = b.T * 1
+    distances = np.array(km.calc_distances(w2vmodel.syn0))
+    b = distances == np.min(distances,axis=0)
+    cluster_distances = np.array(distances).T
+    closest_clusters = b.T * 1
     output = []
     revdict = {w: i for i,w in enumerate(w2vmodel.index2word)}
     for i, doc in enumerate(in_docs):
-        #x_dists = np.zeros(len(cluster_distances[0]))
-        #_closest = np.zeros(len(closest_clusters[0]))
-        x_sum = np.zeros(len(w2vmodel.syn0[0]))
+        x_dists = np.zeros(len(cluster_distances[0]))
+        x_closest = np.zeros(len(closest_clusters[0]))
         count = 0
         for word, word_count in Counter(doc).iteritems():
             if word in revdict:
                 try:
-                    x_sum += w2vmodel.syn0[revdict[word]]
-                    #tfidf_score = tfidf_t[i,tfidf.vocabulary_[word]]
+                    tfidf_score = tfidf_t[i,tfidf.vocabulary_[word]]
                     count += 1
-                    #x_dists = x_dists + cluster_distances[revdict[word]] * tfidf_score
-                    #x_closest = x_closest + closest_clusters[revdict[word]] * word_count
+                    x_dists = x_dists + cluster_distances[revdict[word]] * tfidf_score
+                    x_closest = x_closest + closest_clusters[revdict[word]] * word_count
                 except:
                     pass
         if count > 0:
              x_sum = x_sum / count
-        #    x_dists = x_dists / np.sum(x_dists)
-        #    x_closest = x_closest / np.sum(x_closest)
-        #output.append(np.hstack((x_dists,x_closest)))
-        output.append(x_sum)
+             x_dists = x_dists / np.sum(x_dists)
+             x_closest = x_closest / np.sum(x_closest)
+        output.append(np.hstack((x_dists,x_closest)))
     return output
