@@ -10,7 +10,7 @@ I know that if turnaround time could be improved by even a minute per ticket by 
 Auto categorization could also help detect important tickets (ie "the building is on fire") quickly, and future algorithms could recognize patterns in incoming tickets to help detect production problems.
 
 ####So what exactly does it do?
-This product automatically classifies all tickets from the django product them based on prior labels
+This product automatically classifies all tickets from the django ticket tracker and classifies them based on assigned labels of other tickets.
 
 The algorithm it uses is very simple: TFIDF with multinomial logistic regression and Latent Dirichlet Allocation for a very marginal improvement.
 
