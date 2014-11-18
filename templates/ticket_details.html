@@ -5,14 +5,16 @@
         <tr><td><h3><span class="label label-default">Ticket text</span></h3></td><td>{{ i['body'] }}</td></tr>
         <tr><td><h3><span class="label label-default">Ticket creation date</span></h3></td><td>{{ i['created_at'] }}</td></tr>
         <tr><td><h3><span class="label label-default">Labels assigned</span></h3></td><td>{{ i['labels'] }}</td></tr>
-        <tr><td><h3><span class="label label-default">Guesess</span></h3></td><td>{{ i['guesses'] }}</td></tr>
+        <tr><td><h3><span class="label label-default">Guesess (Tag:% likely)</span></h3></td><td>{{ i['guesses'] }}</td></tr>
+        <tr><td><h3><span class="label label-default">Best guess</span></h3></td><td>{{ i['best_guess'] }}</td></tr>
         <tr><td><h3><span class="label label-default">Assign label</span></h3></td><td>
           <form action="/flag" class="changeClass" event_id="{{ i['_id'] }}">
             <input type="radio" name="flag{{ i['_id'] }}" value="Bug" {% if has_label(i['labels'],'bug') %}checked{% endif %} >Bug</input><br>
             <input type="radio" name="flag{{ i['_id'] }}" value="Feature"  {% if has_label(i['labels'],'feature') %}checked{% endif %} >Feature</input><br>
             <input type="radio" name="flag{{ i['_id'] }}" value="uncategorized" {% if not has_label(i['labels'],'bug') and not has_label(i['labels'],'feature') %}checked{% endif %}>Uncategorized</input><br>
             <button type="submit" value="Search">Submit</button>
-          </form>
+          </form></td></tr>
+        <tr><td><h3><span class="label label-default">Repo URL:</span></h3></td><td>{{ i['repo_url'] }}</td></tr>
     </table>
     {% endfor %}
     <script>

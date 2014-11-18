@@ -105,6 +105,8 @@ function drawGraph() {
       })
       .on("click", function(d) { details_url = d.url; showDetails(); })
       .on("mouseout", function(){return tooltip.style("visibility", "hidden");})
+
+      svg.append("text").attr("class","y label")
 }
 
 function showDetails() {
@@ -138,5 +140,6 @@ function createGraph() {
   $(window).resize(function() {
     drawGraph();
   });
+  $('#howtoModal').modal('show')    
 
 }
