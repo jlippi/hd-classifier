@@ -242,7 +242,6 @@ def kmeans_word2vecify(in_docs,w2vmodel,km,tfidf_t,tfidf):
                 except:
                     pass
         if count > 0:
-             x_sum = x_sum / count
              x_dists = x_dists / np.sum(x_dists)
              x_closest = x_closest / np.sum(x_closest)
         output.append(np.hstack((x_dists,x_closest)))

@@ -23,6 +23,9 @@ DJANGO_parms['labeldict'] = {
   'task': 'unk',
   u'd\xe9faut': 'unk',
   'Uncategorized': 'unk',
+  'uncategorized': 'unk',
+  'feature': 'enhancement',
+  'bug': 'Bug',
   'Bug': 'Bug',
   u'': 'unk' } 
 
